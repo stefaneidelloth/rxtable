@@ -1,0 +1,85 @@
+{
+  "name": "rxtable",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "build": "webpack -p --progress --config webpack.config.js",
+    "build-dev": "webpack -d --progress --config webpack.config.js",
+    "eslint": "eslint . --ext .js,.jsx",
+    "eslint-fix": "eslint . --ext .js --fix",
+    "lint": "eslint . --ext .js && npx stylelint src/**/*.css",
+    "lint-fix": "eslint . --ext .js --fix && npx stylelint src/**/*.css --fix",
+    "style-lint": "npx stylelint src/**/*.css",
+    "style-lint-fix": "npx stylelint src/**/*.css --fix",
+    "test": "jest --runInBand",
+    "test-watch": "jest --runInBand --watch",
+    "test-git": "jest --runInBand -o",
+    "test-coverage": "jest --runInBand --coverage",
+    "test-debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --o",
+    "watch": "webpack -d --progress --config webpack.config.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stefaneidelloth/rxtable.git"
+  },
+  "author": "Stefan Eidelloth",
+  "license": "MIT",
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ]
+  },
+  "dependencies": {
+    "d3": "^5.16.0",
+    "pouchdb-adapter-idb": "^7.2.1",
+    "pouchdb-adapter-memory": "^7.2.1",
+    "rxdb": "^9.3.0",
+    "rxjs": "^6.5.5"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.10.3",
+    "@babel/core": "7.10.3",
+    "@babel/node": "7.10.3",
+    "@babel/preset-env": "7.10.3",
+    "@testing-library/jest-dom": "5.10.1",
+    "babel-jest": "26.1.0",
+    "babel-loader": "8.1.0",
+    "copy-webpack-plugin": "6.0.2",
+    "css-loader": "3.6.0",
+    "eslint": "7.3.1",
+    "eslint-config-airbnb": "18.2.0",
+    "eslint-loader": "4.0.2",
+    "eslint-plugin-import": "2.21.2",
+    "eslint-plugin-jest": "23.17.1",
+    "eslint-plugin-jsx-a11y": "6.3.1",
+    "eslint-plugin-react": "7.20.0",
+    "eslint-plugin-react-hooks": "4.0.4",
+    "file-loader": "6.0.0",
+    "istanbul": "0.4.5",
+    "jest": "26.1.0",
+    "jest-cli": "26.1.0",
+    "jest-puppeteer": "4.4.0",
+    "mini-css-extract-plugin": "0.9.0",
+    "npx": "10.2.2",
+    "puppeteer": "4.0.1",
+    "puppeteer-to-istanbul": "1.4.0",
+    "style-loader": "1.2.1",
+    "stylelint": "13.6.1",
+    "stylelint-config-standard": "20.0.0",
+    "stylelint-no-unused-selectors": "1.0.28",
+    "url-loader": "4.1.0",
+    "webpack": "4.43.0",
+    "webpack-cli": "3.3.12"
+  },
+  "optionalDependencies": {
+    "fsevents": "2.1.3"
+  }
+}

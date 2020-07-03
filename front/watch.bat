@@ -1,0 +1,1 @@
+start "npm watch" /D . npm run watch

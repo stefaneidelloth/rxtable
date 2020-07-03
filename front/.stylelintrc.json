@@ -1,0 +1,12 @@
+{
+  "extends": "stylelint-config-standard",
+  "plugins": [
+    "stylelint-no-unused-selectors"
+  ],
+  "rules": {
+    "selector-class-pattern": "^([a-z][a-z0-9]*)(-[a-z0-9]+)*$",
+    "plugin/no-unused-selectors": true,
+    "selector-max-id": 1
+  }
+}
+

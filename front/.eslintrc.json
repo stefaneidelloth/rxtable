@@ -1,0 +1,65 @@
+{
+    "env": {
+        "browser": true,
+        "es6": true,
+        "jest/globals": true
+    },
+    "extends": [
+        "airbnb",
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:jest/all"
+    ],
+    "globals": {
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "jsx-a11y",
+        "import",
+        "react-hooks",
+        "jest"
+    ],
+    "rules": {
+        "react/jsx-filename-extension": "error",
+        "react/jsx-max-depth": [1, {"max": 8}],
+        //"react/jsx-no-literals": [1, {"noStrings": true, "allowedStrings": [],"ignoreProps": true}],
+        "react/jsx-uses-react": "error",
+        "react/jsx-uses-vars": "error",
+        "react/display-name": 0,
+        "react/function-component-definition": "off",
+        "react/no-set-state": "off",
+        "react/prop-types": 0,
+        "react/require-optimization": "off",
+        "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+        "react-hooks/exhaustive-deps": "warn", // Checks effect dependencies
+        "linebreak-style": ["error", "unix"],
+        "jest/no-hooks": "off",
+        "jest/no-jasmine-globals": "off",
+        "jest/prefer-expect-assertions": "off",
+        "jest/prefer-called-with": "off",
+        // For the next two rules I tried to wrap an input in a label, as described
+        // at https://github.com/evcohen/eslint-plugin-jsx-a11y/blob/master/docs/rules/label-has-associated-control.md
+        // However, that did not help. I want to avoid extra ids, that would have to be unique.
+        // Therefore, I disabled that rule.
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/control-has-associated-label": "off",
+        "max-len": ["error", {"code": 120}],
+        "no-undef": "off",
+        "no-console": "off",
+        "no-else-return": "off",
+        "no-underscore-dangle": "off", //required for names of "private" properties like "_foo"
+        "no-plusplus": "off",
+        "no-restricted-syntax": "off",
+        "no-param-reassign": "off",
+        "no-continue": "off"
+    }
+}

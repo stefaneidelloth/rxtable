@@ -1,0 +1,72 @@
+import {
+  addRxPlugin,
+  createRxDatabase,
+  RxDatabase,
+} from 'rxdb';
+
+import Table from '../table/table';
+import ObservableCollection from './observableCollection';
+
+addRxPlugin(require('pouchdb-adapter-memory'));
+
+const createEnforcer = Symbol();
+
+export default class Database {
+  static enforcer() {
+    return createEnforcer;
+  }
+
+  constructor(enforcer, name) {
+    if (enforcer !== createEnforcer) {
+      throw 'Database cannot be constructed. Please use DatabaseFactory.';
+    }
+    this._name = name;
+  }
+
+  async init() {
+    // doc for RxDb: https://rxdb.info/rx-database.html
+    this._rxDb = await createRxDatabase({ name: this._name, adapter: 'memory' });
+  }
+
+  async createTable(name, keyContext, dataContext) {
+    const table = new Table(Table.enforcer(), name, this, keyContext, dataContext);
+    await table.init();
+    return table;
+  }
+
+  async createObservableCollection(name, keyContext, dataContext) {
+    const schema = this._createSchema(keyContext, dataContext);
+    const rxDbCollection = await this._rxDb.collection({ "name": name, "schema": schema });
+    return new ObservableCollection(rxDbCollection);
+  }
+
+  _createSchema(keyContext, dataContext) {
+    const properties = this._createColumnProperties(keyContext, dataContext);
+
+    // doc for RxDb-Schema: https://rxdb.info/rx-schema.html
+
+    const keyColumnNames = [...keyContext];
+
+    return {
+      title: name,
+      type: 'object',
+      version: 0,
+      properties,
+      required: keyColumnNames,
+      indexes: [keyColumnNames],
+    };
+  }
+
+  _createColumnProperties(keyContext, dataContext) {
+    const properties = {_id: {type: "string", primary: true}};
+    for (let columnName of keyContext) {
+      properties[columnName] = { type: 'integer' };
+    }
+
+    for (const columnName of dataContext) {
+      properties[columnName] = { type: 'number' };
+    }
+
+    return properties;
+  }
+}
