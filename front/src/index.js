@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 import { range, Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
 
 import DatabaseFactory from './database/databaseFactory';
 import KeyContext from './table/keyContext';
 import DataContext from './table/dataContext';
+import { add } from './operator/operators';
 
 run();
 
@@ -25,8 +25,6 @@ async function run() {
     y2040: 3,
   };
 
-  await inputTable.push(inputRow);
-
   let newValue = 4;
   async function buttonClicked() {
     inputRow.y2040 = newValue;
@@ -45,20 +43,31 @@ async function run() {
   // doc for pipe-able operators:
   // https://rxjs.dev/guide/operators
   // https://rxjs.dev/api/operators
-  inputTable
-    .pipe(
-      filter(event => {
-          return event.documentData.y2040 < 6;
-        }
-      )
-    )
-    .subscribe({
-      next(event) {
-        let item = event.documentData;
-        console.log(`scenario: ${item.scenario_id}, y2040: ${item.y2040}`);
-      },
-      error(error) { console.error(`rx error: ${error}`); },
-      complete() { console.log('rx done'); },
-    });
+  inputTable.pipe(
+    add('sum', 66)
+  )
+  .subscribe({
+    initialized(table) {
+      console.log(`table: ${table.name}`);
+    },
+    rowAdded(newRow) {
+      console.log(`rowAdded`);
+    },
+    rowChanged(oldRow, newRow) {
+      console.log(`rowChanged`);
+    },
+    error(error) { console.error(`error: ${error}`); },
+    complete() { console.log('done'); },
+  });
+
+  await inputTable.push(inputRow);
+
+  await inputTable.push({
+    scenario_id: 1,
+    country_id: 1,
+    y2020: 11,
+    y2030: 12,
+    y2040: 13,
+  });
 
 }

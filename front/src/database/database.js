@@ -1,25 +1,16 @@
 import {
   addRxPlugin,
-  createRxDatabase,
-  RxDatabase,
+  createRxDatabase
 } from 'rxdb';
 
 import Table from '../table/table';
-import ObservableCollection from './observableCollection';
+import TableCollection from '../table/tableCollection';
 
 addRxPlugin(require('pouchdb-adapter-memory'));
 
-const createEnforcer = Symbol();
-
 export default class Database {
-  static enforcer() {
-    return createEnforcer;
-  }
 
-  constructor(enforcer, name) {
-    if (enforcer !== createEnforcer) {
-      throw 'Database cannot be constructed. Please use DatabaseFactory.';
-    }
+  constructor(name) {
     this._name = name;
   }
 
@@ -29,15 +20,15 @@ export default class Database {
   }
 
   async createTable(name, keyContext, dataContext) {
-    const table = new Table(Table.enforcer(), name, this, keyContext, dataContext);
+    const table = new Table(name, this, keyContext, dataContext);
     await table.init();
     return table;
   }
 
-  async createObservableCollection(name, keyContext, dataContext) {
-    const schema = this._createSchema(keyContext, dataContext);
-    const rxDbCollection = await this._rxDb.collection({ "name": name, "schema": schema });
-    return new ObservableCollection(rxDbCollection);
+  async createCollection(table) {
+    const schema = this._createSchema(table.keyContext, table.dataContext);
+    const rxDbCollection = await this._rxDb.collection({ "name": table.name, "schema": schema });
+    return new TableCollection(table, rxDbCollection);
   }
 
   _createSchema(keyContext, dataContext) {

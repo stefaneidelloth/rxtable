@@ -2,7 +2,7 @@ import Database from './database';
 
 export default class DatabaseFactory {
   async create(name) {
-    const database = new Database(Database.enforcer(), name);
+    const database = new Database(name);
     await database.init();
     return database;
   }

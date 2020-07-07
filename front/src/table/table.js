@@ -1,14 +1,6 @@
-const createEnforcer = Symbol();
-
 export default class Table {
-  static enforcer() {
-    return createEnforcer;
-  }
 
-  constructor(enforcer, name, database, keyContext, dataContext) {
-    if (enforcer !== createEnforcer) {
-      throw 'Table cannot be constructed directly. Please use method "Database.createTable".';
-    }
+  constructor(name, database, keyContext, dataContext) {
     this._name = name;
     this._database = database;
     this._keyContext = keyContext;
@@ -16,48 +8,60 @@ export default class Table {
     this._collection = undefined;
   }
 
-  async init() {
-    this._collection = await this._database.createObservableCollection(
-      this._name,
-      this._keyContext,
-      this._dataContext
-    );
+  get database() {
+    return this._database;
+  }
+
+  get dataContext() {
+    return this._dataContext;
   }
 
   get keyContext() {
     return this._keyContext;
   }
 
+  get name() {
+    return this._name;
+  }
+
   get valueContext() {
     return this._valueContext;
   }
 
-  get keys() {
-
+  async init() {
+    this._collection = await this._database.createCollection(this);
   }
 
-  contains(key) {
-
+  [Symbol.iterator]() {
+    return this._collection[Symbol.iterator]();
   }
 
-  idSet(idColumnName) {
+  pipe(...tableOperators){
 
+    let table = this;
+
+    let promise = new Promise(async (resolve) =>{
+      for (let tableOperator of tableOperators){
+       table = await this._subscribeOperator(tableOperator, table);
+      }
+      resolve(table);
+    });
+
+    promise.subscribe = (subscriber)=>{
+      promise.then(resultTable=>{
+        resultTable.subscribe(subscriber);
+      })
+    };
+
+    return promise;
   }
 
   async push(rowValues) {
     return await this._collection.insert(rowValues);
   }
 
-  pipe(argument){
-    return this._collection.pipe(argument);
-  }
-
-  row(key) {
-
-  }
-
-  subscribe(subscriber) {
-    return this._collection.subscribe(subscriber);
+  subscribe(tableSubscriber) {
+    return this._collection.subscribe(tableSubscriber);
   }
 
   async update(newRowValues) {
@@ -87,5 +91,17 @@ export default class Table {
       selector[columnName] = {$eq: rowValues[columnName]};
     }
     return selector;
+  }
+
+  async _subscribeOperator(tableOperator, sourceTable){
+    const database = sourceTable.database;
+    const name = tableOperator.name(sourceTable);
+    const keyContext = tableOperator.keyContext(sourceTable);
+    const dataContext = tableOperator.dataContext(sourceTable);
+
+    const targetTable = await database.createTable(name, keyContext, dataContext);
+    tableOperator.targetTable = targetTable;
+    sourceTable.subscribe(tableOperator);
+    return targetTable;
   }
 }
