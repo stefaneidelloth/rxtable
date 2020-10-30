@@ -3,8 +3,7 @@ import Operator from './operator';
 export default class Add extends Operator {
 
   constructor(name, ...summands){
-    super();
-    this._name = name;
+    super(name);
     this._summands = summands;
   }
 
@@ -13,6 +12,7 @@ export default class Add extends Operator {
   }
 
   initialized(sourceTable){
+    super.initialized(sourceTable);
     for(let row of sourceTable){
       let newRow = row.copy();
       for(let valueColumnName of sourceTable.valueContext){
@@ -22,8 +22,9 @@ export default class Add extends Operator {
     }
   }
 
-  rowChanged(oldRow, newRow){
-    throw new Error('Not yet implemented!');
+  valueChanged(sourceTable, sourceKey, valueColumnName, oldValue, newValue){
+    var targetRow = this._targetTable.row(sourceKey);
+    targetRow[valueColumnName] = oldValue + (newValue-oldValue);
   }
 
   keyContext(sourceTable){

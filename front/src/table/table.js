@@ -4,6 +4,7 @@ export default class Table {
     this._name = name;
     this._database = database;
     this._keyContext = keyContext;
+    this._keyMap = {};
     this._dataContext = dataContext;
     this._collection = undefined;
   }
@@ -65,32 +66,20 @@ export default class Table {
   }
 
   async update(newRowValues) {
-    let selector = this._rowSelector(newRowValues);
-
-    const changeFunction = (rowValues) => {
-        for(let columnName of this._dataContext){
-          let newValue = newRowValues[columnName];
-          if(rowValues[columnName] !== newValue){
-            rowValues[columnName] = newValue;
-          }
-        }
-        return rowValues;
-    }
-
-    await this._collection.findOne({selector: selector})
-      .exec()
-      .then(async document=>{
-          await document.atomicUpdate(changeFunction);
-      });
-
+    await this._collection.update(newRowValues);
   }
 
-  _rowSelector(rowValues){
-    let selector = {};
-    for(let columnName of this._keyContext){
-      selector[columnName] = {$eq: rowValues[columnName]};
-    }
-    return selector;
+  createKey(rowValues){
+    return this.keyContext.map(keyColumnName=>rowValues[keyColumnName]);
+  }
+
+  createRow(rowValues){
+    rowData.table = this;
+    return rowData;
+  }
+
+  async row(key) {
+    return await this._collection.row(key);
   }
 
   async _subscribeOperator(tableOperator, sourceTable){
