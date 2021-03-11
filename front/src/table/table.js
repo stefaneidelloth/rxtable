@@ -6,7 +6,7 @@ export default class Table {
     this._keyContext = keyContext;
     this._keyMap = {};
     this._dataContext = dataContext;
-    this._collection = undefined;
+    this._tableCollection = undefined;
   }
 
   get database() {
@@ -30,11 +30,11 @@ export default class Table {
   }
 
   async init() {
-    this._collection = await this._database.createCollection(this);
+    this._tableCollection = await this._database.createTableCollection(this);
   }
 
-  [Symbol.iterator]() {
-    return this._collection[Symbol.iterator]();
+  [Symbol.asyncIterator]() {
+    return this._tableCollection[Symbol.asyncIterator]();
   }
 
   pipe(...tableOperators){
@@ -43,7 +43,7 @@ export default class Table {
 
     let promise = new Promise(async (resolve) =>{
       for (let tableOperator of tableOperators){
-       table = await this._subscribeOperator(tableOperator, table);
+       table = await this._subscribeOperator(tableOperator, table);       
       }
       resolve(table);
     });
@@ -52,21 +52,31 @@ export default class Table {
       promise.then(resultTable=>{
         resultTable.subscribe(subscriber);
       })
+      return promise;
     };
 
     return promise;
   }
 
   async push(rowValues) {
-    return await this._collection.insert(rowValues);
+    return await this._tableCollection.insert(rowValues);
   }
 
   subscribe(tableSubscriber) {
-    return this._collection.subscribe(tableSubscriber);
+
+    let table = this;
+
+    let promise = new Promise(async (resolve) =>{
+      await this._tableCollection.subscribe(tableSubscriber); 
+      await tableSubscriber.initialized(table);           
+      resolve(table);
+    });    
+   
+    return promise;
   }
 
   async update(newRowValues) {
-    await this._collection.update(newRowValues);
+    await this._tableCollection.update(newRowValues);
   }
 
   createKey(rowValues){
@@ -74,12 +84,12 @@ export default class Table {
   }
 
   createRow(rowValues){
-    rowData.table = this;
-    return rowData;
+    rowValues.table = this;
+    return rowValues;
   }
 
   async row(key) {
-    return await this._collection.row(key);
+    return await this._tableCollection.row(key);
   }
 
   async _subscribeOperator(tableOperator, sourceTable){
@@ -92,5 +102,27 @@ export default class Table {
     tableOperator.targetTable = targetTable;
     sourceTable.subscribe(tableOperator);
     return targetTable;
+  } 
+
+  async dump(){
+    return this._tableCollection.dump();
   }
+
+  async show(){
+    console.log('Table "' + this.name + '":');   
+    var headers = [...this.keyContext, ...this.dataContext]; 
+    var data = {};  
+    for await (var row of this){       
+      data[row._id] = row;
+    }  
+    if(Object.keys(data).length>0){
+      console.table(data, headers);
+    } else {      
+      console.log('|' + headers.join('|') + '|')
+      console.log('... is empty')
+    }
+    
+  }
+
+  
 }

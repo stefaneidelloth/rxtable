@@ -21,7 +21,7 @@ export default class Operator extends TableSubscriber {
     //might be overridden by inheriting class
   }
 
-  initialized(sourceTable){
+  async initialized(sourceTable){
     this._sourceTable = sourceTable;
   }
 
@@ -43,7 +43,7 @@ export default class Operator extends TableSubscriber {
       }
     }
 
-    for(let valueColumnName of sourceTable.valueContext){
+    for(let valueColumnName of table.dataContext){
       const oldValue = oldRow[valueColumnName];
       const newValue = newRow[valueColumnName];
       if(newValue !== oldValue){

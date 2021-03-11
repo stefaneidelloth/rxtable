@@ -6,4 +6,12 @@ export default class Context {
   [Symbol.iterator]() {
     return this._columnNames[Symbol.iterator]();
   }
+
+  map(lambda){
+    return this._columnNames.map(lambda);
+  }
+
+  toString(){   
+    return this._columnNames.join('|');
+  }
 }

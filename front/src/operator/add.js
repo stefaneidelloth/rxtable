@@ -11,20 +11,21 @@ export default class Add extends Operator {
     return sourceTable.dataContext;
   }
 
-  initialized(sourceTable){
-    super.initialized(sourceTable);
-    for(let row of sourceTable){
-      let newRow = row.copy();
-      for(let valueColumnName of sourceTable.valueContext){
-        newRow[valueColumnName] = row[valueColumnName] + this._summands.sum();
+  async initialized(sourceTable){
+    await super.initialized(sourceTable);
+    
+    for await (let row of sourceTable){
+      let newRow = {...row};
+      for(let valueColumnName of sourceTable.dataContext){
+        newRow[valueColumnName] = row[valueColumnName] + this.sum(this._summands);
       }
-      this._targetTable.insert(newRow);
+      await this._targetTable.push(newRow);
     }
-  }
+    
+  }  
 
-  valueChanged(sourceTable, sourceKey, valueColumnName, oldValue, newValue){
-    var targetRow = this._targetTable.row(sourceKey);
-    targetRow[valueColumnName] = oldValue + (newValue-oldValue);
+  sum(array){
+    return array.reduce((a,b)=>a+b);
   }
 
   keyContext(sourceTable){
@@ -33,6 +34,31 @@ export default class Add extends Operator {
 
   name(sourceTable){
     return this._name;
+  }
+
+  valueChanged(sourceTable, sourceKey, valueColumnName, oldValue, newValue){
+    var targetRow = this._targetTable.row(sourceKey);
+    targetRow[valueColumnName] = oldValue + (newValue-oldValue);
+  }
+
+  columnAdded(newColumn){
+     console.log('column added');
+  }
+
+  columnChanged(oldColumn, newColumn){
+      console.log('column changed');
+  }
+
+  columnRemoved(oldColumn){
+      console.log('column removed');
+  }
+
+  rowAdded(newRow){
+    console.log('row added');
+  }
+
+  rowRemoved(oldRow){
+    console.log('row removed');
   }
 
 }

@@ -25,6 +25,12 @@ async function run() {
     y2040: 3,
   };
 
+  await inputTable.push(inputRow);
+
+  await inputTable.show();
+
+
+
   let newValue = 4;
   async function buttonClicked() {
     inputRow.y2040 = newValue;
@@ -43,24 +49,54 @@ async function run() {
   // doc for pipe-able operators:
   // https://rxjs.dev/guide/operators
   // https://rxjs.dev/api/operators
-  inputTable.pipe(
+  var sumTable = await inputTable.pipe(
     add('sum', 66)
   )
-  .subscribe({
-    initialized(table) {
-      console.log(`table: ${table.name}`);
+  .subscribe({   
+    columnAdded(newColumn){
+      console.log(`# columnAdded`);
     },
+
+    columnChanged(oldColumn, newColumn){
+      console.log(`# columnChanged`);
+    },
+
+    columnRemoved(oldColumn){
+        console.log(`# columnRemoved`);
+    },
+
+    async initialized(table){
+      console.log(`# initialized`);
+      await sumTable.show();
+    },
+
     rowAdded(newRow) {
-      console.log(`rowAdded`);
+      console.log(`# rowAdded`);
     },
+
     rowChanged(oldRow, newRow) {
-      console.log(`rowChanged`);
+      console.log(`# rowChanged`);
     },
-    error(error) { console.error(`error: ${error}`); },
-    complete() { console.log('done'); },
+
+    rowRemoved(oldColumn){
+        console.log(`# rowRemoved`);
+    },
+
+    error(error) { 
+      console.error(`# error: ${error}`); 
+    },
+
+    complete() { 
+      console.log('done'); 
+    }
   });
 
-  await inputTable.push(inputRow);
+  
+ 
+
+  /*
+
+ 
 
   await inputTable.push({
     scenario_id: 1,
@@ -69,5 +105,7 @@ async function run() {
     y2030: 12,
     y2040: 13,
   });
+
+  */
 
 }

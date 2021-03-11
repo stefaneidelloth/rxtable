@@ -25,9 +25,12 @@ export default class Database {
     return table;
   }
 
-  async createCollection(table) {
+  async createTableCollection(table) {
     const schema = this._createSchema(table.keyContext, table.dataContext);
-    const rxDbCollection = await this._rxDb.collection({ "name": table.name, "schema": schema });
+    const rxDbCollection = await this._rxDb.collection({ 
+      "name": table.name, 
+      "schema": schema
+    });
     return new TableCollection(table, rxDbCollection);
   }
 
@@ -51,7 +54,7 @@ export default class Database {
   _createColumnProperties(keyContext, dataContext) {
     const properties = {_id: {type: "string", primary: true}};
     for (let columnName of keyContext) {
-      properties[columnName] = { type: 'integer' };
+      properties[columnName] = { type: 'integer'};
     }
 
     for (const columnName of dataContext) {

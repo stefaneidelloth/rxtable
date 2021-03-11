@@ -62,6 +62,8 @@ class BackEnd(object):
                 path = 'main.css'
             if 'index.html' in path:
                 path = 'index.html'
+            if 'favicon.ico' in path:
+                path = 'favicon.ico'
             if 'bundle.js' in path:
                 path = 'bundle.js'
 

@@ -16,8 +16,8 @@ export default class TableSubscriber {
     console.error('error: ' + error);
   }
 
-  initialized(table){
-    throw new Error('Not yet implemented!');
+  async initialized(table){
+    
   }
 
   rowAdded(newRow){
