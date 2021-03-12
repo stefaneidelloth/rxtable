@@ -39,7 +39,7 @@ async function run() {
 
 
   let newValue = 4;
-  async function buttonClicked() {
+  async function updateCellOfInputTable() {
     inputRow.y2040 = newValue;
     await inputTable.update(inputRow);
     newValue++;
@@ -47,8 +47,8 @@ async function run() {
 
   d3.select('#root')
     .append('button')
-    .text('Click me')
-    .on('click', () => buttonClicked());
+    .text('Update cell of input table')
+    .on('click', () => updateCellOfInputTable());
 
 
   await inputTable.pipe(

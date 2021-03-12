@@ -73,10 +73,6 @@ export default class TableCollection {
     return this;
   }
 
-  async dump(){
-    return this._wrappedRxDbCollection.dump();
-  }
-
   async update(newRowValues){
     const key = this._table.createKey(newRowValues);
     const _id = this._keyMap[key]

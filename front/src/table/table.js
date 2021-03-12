@@ -21,6 +21,10 @@ export default class Table {
     return this._keyContext;
   }
 
+  get context(){
+    return [...this.keyContext, ...this.valueContext];
+  }
+
   get name() {
     return this._name;
   }
@@ -93,17 +97,15 @@ export default class Table {
     return targetTable;
   } 
 
-  async dump(){
-    return this._tableCollection.dump();
-  }
-
   async show(){
     console.log('Table "' + this.name + '":');   
-    var headers = [...this.keyContext, ...this.valueContext];
+    
     var data = {};  
     for await (var row of this){       
       data[row._id] = row;
     }  
+
+    var headers = this.context;
     if(Object.keys(data).length>0){
       console.table(data, headers);
     } else {      
@@ -112,6 +114,5 @@ export default class Table {
     }
     
   }
-
   
 }
