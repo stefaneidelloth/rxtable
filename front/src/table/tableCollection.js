@@ -17,7 +17,7 @@ export default class TableCollection {
     } 
   }
 
-  async insert(rowValues){
+  async push(rowValues){
     const key = this._table.createKey(rowValues);
     const result = await this._wrappedRxDbCollection.insert(rowValues);
     this._keyMap[key] = result._id;
@@ -27,7 +27,11 @@ export default class TableCollection {
 
   async row(key){
     const _id = this._keyMap[key];
-    const rowValues = await this._wrappedRxDbCollection.findById(_id);
+    const document = await this._wrappedRxDbCollection.findOne(_id).exec(); //this._wrappedRxDbCollection.findByIds([_id]);
+    if (!document){
+      return null;
+    }
+    var rowValues = document.toJSON();
     return this._table.createRow(rowValues);
   }
 
@@ -41,25 +45,25 @@ export default class TableCollection {
           break;
         case TableEvent.rowAdded:
           const addedRow = this._table.createRow(event.documentData);
-          tableSubscriber.rowAdded(this._table, addedRow);
+          await tableSubscriber.rowAdded(this._table, addedRow);
           break;
         case TableEvent.rowChanged:
           var oldRow = this._table.createRow(event.previousData);
           const newRow = this._table.createRow(event.documentData);
-          tableSubscriber.rowChanged(this._table, oldRow, newRow);
+          await tableSubscriber.rowChanged(this._table, oldRow, newRow);
           break;
         case TableEvent.rowRemoved:
           const removedRow = this._table.createRow(event.previousData);
-          tableSubscriber.rowRemoved(this._table, removedRow);
+          await tableSubscriber.rowRemoved(this._table, removedRow);
           break;
         case TableEvent.columnAdded:
-          tableSubscriber.columnAdded(this._table, newColumn);
+          await tableSubscriber.columnAdded(this._table, newColumn);
           break;
         case TableEvent.columnChanged:
-          tableSubscriber.columnChanged(this._table, oldColumn, newColumn);
+          await tableSubscriber.columnChanged(this._table, oldColumn, newColumn);
           break;
         case TableEvent.columnRemoved:
-          tableSubscriber.columnRemoved(this._table, oldColumn);
+          await tableSubscriber.columnRemoved(this._table, oldColumn);
           break;
         default:
           throw new Error('Table event "' + tableEvent + '" has not yet been implemented.')
@@ -78,7 +82,8 @@ export default class TableCollection {
     const _id = this._keyMap[key]
     var entry = {...newRowValues};
     entry['_id'] = _id;   
-    return await this._wrappedRxDbCollection.upsert(entry);
+    var result =  await this._wrappedRxDbCollection.upsert(entry);
+    return this;
   }
 
   async atomicUpdate(newRowValues) {
@@ -86,7 +91,7 @@ export default class TableCollection {
     let selector = this._rowSelector(newRowValues);
 
     const changeFunction = (rowValues) => {
-        for(let columnName of this._table.dataContext){
+        for(let columnName of this._table.valueContext){
           let newValue = newRowValues[columnName];
           if(rowValues[columnName] !== newValue){
             rowValues[columnName] = newValue;

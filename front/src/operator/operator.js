@@ -13,13 +13,9 @@ export default class Operator extends TableSubscriber {
     this._targetTable = table;
   }
 
-  dataContext(sourceTable){
-    return sourceTable.dataContext;
-  }
-
-  idChanged(newKey, columnName, oldId, newId){
-    //might be overridden by inheriting class
-  }
+  valueContext(sourceTable){
+    return sourceTable.valueContext;
+  }  
 
   async initialized(sourceTable){
     this._sourceTable = sourceTable;
@@ -33,28 +29,32 @@ export default class Operator extends TableSubscriber {
     return sourceTable.name + '_' + this.constructor.name;
   }
 
-  rowChanged(table, oldRow, newRow){
+  async rowChanged(table, oldRow, newRow){
     for(let idColumnName of table.keyContext){
       const oldId = oldRow[idColumnName];
       const newId = newRow[idColumnName];
       if(newId !== oldId){
         const newKey = table.createKey(newRow);
-        this.idChanged(table, newKey, idColumnName, oldId, newId);
+        await this.idChanged(table, newKey, idColumnName, oldId, newId);
       }
     }
 
-    for(let valueColumnName of table.dataContext){
+    for(let valueColumnName of table.valueContext){
       const oldValue = oldRow[valueColumnName];
       const newValue = newRow[valueColumnName];
       if(newValue !== oldValue){
         const key = table.createKey(newRow);
-        this.valueChanged(table, key, valueColumnName, oldValue, newValue);
+        await this.valueChanged(table, key, valueColumnName, oldValue, newValue);
       }
     }
   }
 
-  valueChanged(table, key, columnName, oldValue, newValue){
-    //might be overridden by inheriting class
+  async idChanged(newKey, columnName, oldId, newId){
+    throw new Error('Should be overridden by inheriting class');
+  }
+
+  async valueChanged(table, key, columnName, oldValue, newValue){
+    throw new Error('Should be overridden by inheriting class');
   }
 
 }

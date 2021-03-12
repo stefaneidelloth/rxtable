@@ -3,19 +3,26 @@ import { range, Observable } from 'rxjs';
 
 import DatabaseFactory from './database/databaseFactory';
 import KeyContext from './table/keyContext';
-import DataContext from './table/dataContext';
+import ValueContext from './table/valueContext';
 import { add } from './operator/operators';
 
 run();
+
+// doc for Observable API:
+// https://rxjs.dev/api/index/class/Observable
+
+// doc for pipe-able operators:
+// https://rxjs.dev/guide/operators
+// https://rxjs.dev/api/operators
 
 async function run() {
   const databaseFactory = new DatabaseFactory();
   const database = await databaseFactory.create('project');
 
   const keyContext = new KeyContext(['scenario_id','country_id']);
-  const dataContext = new DataContext(['y2020','y2030','y2040']);
+  const valueContext = new ValueContext(['y2020','y2030','y2040']);
 
-  const inputTable = await database.createTable('input', keyContext, dataContext);
+  const inputTable = await database.createTable('input', keyContext, valueContext);
 
   const inputRow = {
     scenario_id: 0,
@@ -43,42 +50,39 @@ async function run() {
     .text('Click me')
     .on('click', () => buttonClicked());
 
-  // doc for Observable API:
-  // https://rxjs.dev/api/index/class/Observable
 
-  // doc for pipe-able operators:
-  // https://rxjs.dev/guide/operators
-  // https://rxjs.dev/api/operators
-  var sumTable = await inputTable.pipe(
+  await inputTable.pipe(
     add('sum', 66)
   )
   .subscribe({   
-    columnAdded(newColumn){
+    async columnAdded(table, newColumn){
       console.log(`# columnAdded`);
     },
 
-    columnChanged(oldColumn, newColumn){
+    async columnChanged(table, oldColumn, newColumn){
       console.log(`# columnChanged`);
     },
 
-    columnRemoved(oldColumn){
+    async columnRemoved(table, oldColumn){
         console.log(`# columnRemoved`);
     },
 
     async initialized(table){
       console.log(`# initialized`);
-      await sumTable.show();
+      await table.show();
     },
 
-    rowAdded(newRow) {
+    async rowAdded(table, newRow) {
       console.log(`# rowAdded`);
+      await table.show();
     },
 
-    rowChanged(oldRow, newRow) {
+    async rowChanged(table, oldRow, newRow){
       console.log(`# rowChanged`);
-    },
+        await table.show();
+    },    
 
-    rowRemoved(oldColumn){
+    async rowRemoved(table, oldColumn){
         console.log(`# rowRemoved`);
     },
 
@@ -90,12 +94,6 @@ async function run() {
       console.log('done'); 
     }
   });
-
-  
- 
-
-  /*
-
  
 
   await inputTable.push({
@@ -105,7 +103,8 @@ async function run() {
     y2030: 12,
     y2040: 13,
   });
+  
 
-  */
+  
 
 }

@@ -7,24 +7,33 @@ export default class Add extends Operator {
     this._summands = summands;
   }
 
-  dataContext(sourceTable){
-    return sourceTable.dataContext;
+  valueContext(sourceTable){
+    return sourceTable.valueContext;
   }
 
   async initialized(sourceTable){
     await super.initialized(sourceTable);
     
-    for await (let row of sourceTable){
-      let newRow = {...row};
-      for(let valueColumnName of sourceTable.dataContext){
-        newRow[valueColumnName] = row[valueColumnName] + this.sum(this._summands);
-      }
-      await this._targetTable.push(newRow);
+    for await (let sourceRow of sourceTable){
+      await this._createTargetRow(sourceRow, sourceTable);
     }
     
   }  
 
-  sum(array){
+  async _createTargetRow(sourceRow, sourceTable){
+
+    let newRow = {};
+    for (var key of sourceTable.keyContext){
+      newRow[key] = sourceRow[key];
+    }
+    
+    for(let valueColumnName of sourceTable.valueContext){
+      newRow[valueColumnName] = sourceRow[valueColumnName] + this._sum(this._summands);
+    }
+    await this._targetTable.push(newRow);
+  }
+
+  _sum(array){
     return array.reduce((a,b)=>a+b);
   }
 
@@ -36,29 +45,34 @@ export default class Add extends Operator {
     return this._name;
   }
 
-  valueChanged(sourceTable, sourceKey, valueColumnName, oldValue, newValue){
-    var targetRow = this._targetTable.row(sourceKey);
-    targetRow[valueColumnName] = oldValue + (newValue-oldValue);
+  async columnAdded(table, newColumn){
+     console.log('add operator: column added');
   }
 
-  columnAdded(newColumn){
-     console.log('column added');
+  async columnChanged(table, oldColumn, newColumn){
+      console.log('add operator: column changed');
   }
 
-  columnChanged(oldColumn, newColumn){
-      console.log('column changed');
+  async columnRemoved(table, oldColumn){
+      console.log('add operator: column removed');
   }
 
-  columnRemoved(oldColumn){
-      console.log('column removed');
+  async idChanged(newKey, columnName, oldId, newId){
+    throw new Error('Not yet implemented');
   }
 
-  rowAdded(newRow){
-    console.log('row added');
+  async valueChanged(sourceTable, sourceKey, valueColumnName, oldValue, newValue){
+    var targetRow = await this._targetTable.row(sourceKey); //target and source id must be the same here
+    targetRow[valueColumnName] = targetRow[valueColumnName] + (newValue-oldValue);
+    await this._targetTable.update(targetRow);
   }
 
-  rowRemoved(oldRow){
-    console.log('row removed');
+  async rowAdded(sourceTable, sourceRow){
+    await this._createTargetRow(sourceRow, sourceTable);
+  }
+
+  async rowRemoved(table, oldRow){
+    console.log('add operator: row removed');
   }
 
 }

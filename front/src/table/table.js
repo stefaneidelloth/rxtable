@@ -1,11 +1,11 @@
 export default class Table {
 
-  constructor(name, database, keyContext, dataContext) {
+  constructor(name, database, keyContext, valueContext) {
     this._name = name;
     this._database = database;
     this._keyContext = keyContext;
     this._keyMap = {};
-    this._dataContext = dataContext;
+    this._valueContext = valueContext;
     this._tableCollection = undefined;
   }
 
@@ -13,8 +13,8 @@ export default class Table {
     return this._database;
   }
 
-  get dataContext() {
-    return this._dataContext;
+  get valueContext() {
+    return this._valueContext;
   }
 
   get keyContext() {
@@ -23,10 +23,6 @@ export default class Table {
 
   get name() {
     return this._name;
-  }
-
-  get valueContext() {
-    return this._valueContext;
   }
 
   async init() {
@@ -48,9 +44,9 @@ export default class Table {
       resolve(table);
     });
 
-    promise.subscribe = (subscriber)=>{
-      promise.then(resultTable=>{
-        resultTable.subscribe(subscriber);
+    promise.subscribe = async (subscriber)=>{
+      await promise.then(async (resultTable) => {
+        await resultTable.subscribe(subscriber);
       })
       return promise;
     };
@@ -59,20 +55,13 @@ export default class Table {
   }
 
   async push(rowValues) {
-    return await this._tableCollection.insert(rowValues);
+    return await this._tableCollection.push(rowValues);
   }
 
-  subscribe(tableSubscriber) {
-
-    let table = this;
-
-    let promise = new Promise(async (resolve) =>{
+  async subscribe(tableSubscriber) {    
       await this._tableCollection.subscribe(tableSubscriber); 
-      await tableSubscriber.initialized(table);           
-      resolve(table);
-    });    
-   
-    return promise;
+      await tableSubscriber.initialized(this);           
+      return this;
   }
 
   async update(newRowValues) {
@@ -84,8 +73,8 @@ export default class Table {
   }
 
   createRow(rowValues){
-    rowValues.table = this;
-    return rowValues;
+    var row = {...rowValues};   
+    return row;
   }
 
   async row(key) {
@@ -96,9 +85,9 @@ export default class Table {
     const database = sourceTable.database;
     const name = tableOperator.name(sourceTable);
     const keyContext = tableOperator.keyContext(sourceTable);
-    const dataContext = tableOperator.dataContext(sourceTable);
+    const valueContext = tableOperator.valueContext(sourceTable);
 
-    const targetTable = await database.createTable(name, keyContext, dataContext);
+    const targetTable = await database.createTable(name, keyContext, valueContext);
     tableOperator.targetTable = targetTable;
     sourceTable.subscribe(tableOperator);
     return targetTable;
@@ -110,7 +99,7 @@ export default class Table {
 
   async show(){
     console.log('Table "' + this.name + '":');   
-    var headers = [...this.keyContext, ...this.dataContext]; 
+    var headers = [...this.keyContext, ...this.valueContext];
     var data = {};  
     for await (var row of this){       
       data[row._id] = row;

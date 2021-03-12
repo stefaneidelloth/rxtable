@@ -1,14 +1,14 @@
 export default class TableSubscriber {
 
-  columnAdded(newColumn){
+  async columnAdded(newColumn){
      throw new Error('Not yet implemented!');
   }
 
-  columnChanged(oldColumn, newColumn){
+  async columnChanged(oldColumn, newColumn){
       throw new Error('Not yet implemented!');
   }
 
-  columnRemoved(oldColumn){
+  async columnRemoved(oldColumn){
       throw new Error('Not yet implemented!');
   }
 
@@ -20,15 +20,15 @@ export default class TableSubscriber {
     
   }
 
-  rowAdded(newRow){
+  async rowAdded(newRow){
     throw new Error('Not yet implemented!');
   }
 
-  rowChanged(oldRow, newRow){
+  async rowChanged(oldRow, newRow){
     throw new Error('Not yet implemented!');
   }
 
-  rowRemoved(oldRow){
+  async rowRemoved(oldRow){
     throw new Error('Not yet implemented!');
   }
 

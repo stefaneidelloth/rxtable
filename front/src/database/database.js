@@ -19,14 +19,14 @@ export default class Database {
     this._rxDb = await createRxDatabase({ name: this._name, adapter: 'memory' });
   }
 
-  async createTable(name, keyContext, dataContext) {
-    const table = new Table(name, this, keyContext, dataContext);
+  async createTable(name, keyContext, valueContext) {
+    const table = new Table(name, this, keyContext, valueContext);
     await table.init();
     return table;
   }
 
   async createTableCollection(table) {
-    const schema = this._createSchema(table.keyContext, table.dataContext);
+    const schema = this._createSchema(table.keyContext, table.valueContext);
     const rxDbCollection = await this._rxDb.collection({ 
       "name": table.name, 
       "schema": schema
@@ -34,8 +34,8 @@ export default class Database {
     return new TableCollection(table, rxDbCollection);
   }
 
-  _createSchema(keyContext, dataContext) {
-    const properties = this._createColumnProperties(keyContext, dataContext);
+  _createSchema(keyContext, valueContext) {
+    const properties = this._createColumnProperties(keyContext, valueContext);
 
     // doc for RxDb-Schema: https://rxdb.info/rx-schema.html
 
@@ -51,13 +51,13 @@ export default class Database {
     };
   }
 
-  _createColumnProperties(keyContext, dataContext) {
+  _createColumnProperties(keyContext, valueContext) {
     const properties = {_id: {type: "string", primary: true}};
     for (let columnName of keyContext) {
       properties[columnName] = { type: 'integer'};
     }
 
-    for (const columnName of dataContext) {
+    for (const columnName of valueContext) {
       properties[columnName] = { type: 'number' };
     }
 
