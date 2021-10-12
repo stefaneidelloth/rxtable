@@ -2,8 +2,6 @@ import * as d3 from 'd3';
 import { range, Observable } from 'rxjs';
 
 import DatabaseFactory from './database/databaseFactory';
-import KeyContext from './table/keyContext';
-import ValueContext from './table/valueContext';
 import { add } from './operator/operators';
 
 run();
@@ -19,9 +17,8 @@ async function run() {
   const databaseFactory = new DatabaseFactory();
   const database = await databaseFactory.create('project');
 
-  const keyContext = new KeyContext(['scenario_id','country_id']);
-  const valueContext = new ValueContext(['y2020','y2030','y2040']);
-
+  const keyContext = ['scenario_id','country_id'];
+  const valueContext = ['y2020','y2030','y2040'];
   const inputTable = await database.createTable('input', keyContext, valueContext);
 
   const inputRow = {
@@ -33,7 +30,6 @@ async function run() {
   };
 
   await inputTable.push(inputRow);
-
   await inputTable.show();
 
 
@@ -52,7 +48,8 @@ async function run() {
 
 
   await inputTable.pipe(
-    add('sum', 66)
+    add('sum_table', 10),
+    add('extra_sum_table', 10)
   )
   .subscribe({   
     async columnAdded(table, newColumn){

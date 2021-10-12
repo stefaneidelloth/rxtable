@@ -4,6 +4,8 @@ import {
 } from 'rxdb';
 
 import Table from '../table/table';
+import KeyContext from '../table/keyContext';
+import ValueContext from '../table/valueContext';
 import TableCollection from '../table/tableCollection';
 
 addRxPlugin(require('pouchdb-adapter-memory'));
@@ -19,8 +21,13 @@ export default class Database {
     this._rxDb = await createRxDatabase({ name: this._name, adapter: 'memory' });
   }
 
-  async createTable(name, keyContext, valueContext) {
-    const table = new Table(name, this, keyContext, valueContext);
+  async createTable(name, keyContextArray, valueContextArray) {
+    const table = new Table(
+      name, 
+      this, 
+      new KeyContext(keyContextArray), 
+      new ValueContext(valueContextArray)
+    );
     await table.init();
     return table;
   }
